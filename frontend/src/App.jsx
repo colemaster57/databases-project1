@@ -2,8 +2,8 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import NavigationBar from './compents/NavigationBar'
 import Home from './pages/Home'
-import Home from './pages/Library'
-import Home from './pages/Store'
+import Library from './pages/Library'
+import Store from './pages/Store'
 import './App.css'
 function App(){
   return(
@@ -20,3 +20,4 @@ function App(){
   )
 
 }
+export default App

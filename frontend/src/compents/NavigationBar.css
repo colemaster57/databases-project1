@@ -1,0 +1,18 @@
+.navigationbar{
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color:#474747;
+    color:white
+}
+
+.navigationbar ul{
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
