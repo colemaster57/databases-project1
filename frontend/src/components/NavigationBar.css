@@ -1,18 +1,31 @@
 .navigationbar{
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 1rem;
-    background-color:#474747;
-    color:white
+    background-color:#b12727;
+    color:white;
 }
 
-.navigationbar ul{
+.logo{
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navigation-links{
     list-style: none;
     display: flex;
     gap: 1rem;
+    margin: 0;
+    padding: 0;
 }
 
-.navbar a {
-    color: white;
+.navigation-links a:hover {
     text-decoration: none;
+    color: white;
+    transition: color .03s ease;
+}
+.navigation-links a:hover {
+    text-decoration: underline;
+    color: #aaa
 }

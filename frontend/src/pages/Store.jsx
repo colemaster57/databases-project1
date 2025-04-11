@@ -1,5 +1,6 @@
 function Store() {
-    return
+    return(
     <h1>Welcome to the store page!</h1>
+    );
 }
-export default Store
+export default Store;
