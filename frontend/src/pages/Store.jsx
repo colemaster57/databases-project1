@@ -1,6 +1,11 @@
+import React from 'react';
+import GameList from "../components/GameList";
 function Store() {
     return(
-    <h1>Welcome to the store page!</h1>
+    <div>
+        <h1>Welcome to the store page!</h1>
+        <GameList />
+    </div>
     );
 }
 export default Store;
