@@ -47,7 +47,8 @@ user_id INTEGER,
 game_id INTEGER, 
 added_date TEXT, 
 FOREIGN KEY(user_id) REFERENCES Users(user_id),
-FOREIGN KEY(game_id) REFERENCES Games(game_id)) 
+FOREIGN KEY(game_id) REFERENCES Games(game_id))
+UNIQUE(user_id, game_id) 
 ''')
 
 cursor.execute('''

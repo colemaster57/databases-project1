@@ -1,48 +1,44 @@
 import React, { useState, useEffect } from 'react';
 
-function GameList(){
+function GameList({ user }) {
     const [games, setGames] = useState([]);
 
     useEffect(() => {
         fetch('http://localhost:3001/games')
-        .then(res => res.json())
-        .then(data => setGames(data))
-        .catch(err => console.error(err));
-    
+            .then(res => res.json())
+            .then(data => setGames(data))
+            .catch(err => console.error(err));
     }, []);
-    // useEffect(() => {
-    //     //This is just static data for testing.
-    //     const fetchedGames = [
-    //         { id: 1, name: "Game 1" },
-    //         { id: 2, name: "Game 2" },
-    //         { id: 3, name: "Game 3" },
-    //     ];
-    //     setGames(fetchedGames);
-    // }, []);
+
     const handleAddToLibrary = (gameId) => {
         if (!user) {
             alert("You need to log in to add games to your library.");
             return;
         }
+        console.log("Adding game to library for user:", user.user_id);
 
         fetch('http://localhost:3001/library', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ user_id: user.user_id, game_id: gameId })
+            body: JSON.stringify({
+                user_id: user.user_id,  // Assuming user_id is available in `user` prop
+                game_id: gameId,
+            }),
         })
-        .then(res => {
-            if (!res.ok) throw new Error("Failed to add game");
-            return res.json();
-        })
-        .then(data => {
-            alert(data.message);
-        })
-        .catch(err => {
-            console.error("Error:", err.message);
-        });
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to add game");
+                return res.json();
+            })
+            .then(data => {
+                alert(data.message);  // Success message
+            })
+            .catch(err => {
+                console.error("Error:", err.message);
+            });
     };
+
     return (
         <div>
             <h2>Games List</h2>
@@ -69,4 +65,5 @@ function GameList(){
         </div>
     );
 }
+
 export default GameList;

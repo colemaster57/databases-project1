@@ -53,15 +53,86 @@ app.post('/update-balance', (req, res) => {
 app.post('/library', (req, res) => {
     const { user_id, game_id } = req.body;
 
-    db.run(`INSERT INTO Library (user_id, game_id) VALUES (?, ?)`, [user_id, game_id], function(err) {
-        if (err) {
-            console.error("Error adding game to library:", err.message);
-            return res.status(500).json({ error: err.message });
-        }
-        res.status(201).json({ message: "Game added to library" });
-    });
-});
+    
+    db.get(
+        `SELECT price FROM Games WHERE game_id = ?`,
+        [game_id],
+        (err, game) => {
+            if (err) {
+                console.error("Error fetching game price:", err.message);
+                return res.status(500).json({ error: err.message });
+            }
+            if (!game) {
+                return res.status(404).json({ error: "Game not found" });
+            }
 
+            
+            db.get(
+                `SELECT balance FROM Users WHERE user_id = ?`,
+                [user_id],
+                (err, user) => {
+                    if (err) {
+                        console.error("Error fetching user balance:", err.message);
+                        return res.status(500).json({ error: err.message });
+                    }
+                    if (!user) {
+                        return res.status(404).json({ error: "User not found" });
+                    }
+
+                    
+                    if (user.balance < game.price) {
+                        return res.status(400).json({ error: "Insufficient balance" });
+                    }
+
+                    
+                    const newBalance = user.balance - game.price;
+
+                    db.run(
+                        `UPDATE Users SET balance = ? WHERE user_id = ?`,
+                        [newBalance, user_id],
+                        function (err) {
+                            if (err) {
+                                console.error("Error updating user balance:", err.message);
+                                return res.status(500).json({ error: err.message });
+                            }
+
+                            
+                            db.run(
+                                `INSERT INTO Library (user_id, game_id, added_date) VALUES (?, ?, ?)`,
+                                [user_id, game_id, new Date().toISOString()],
+                                function (err) {
+                                    if (err) {
+                                        console.error("Error adding game to library:", err.message);
+                                        return res.status(500).json({ error: err.message });
+                                    }
+
+                                    
+                                    db.all(
+                                        `SELECT Games.game_id, Games.title FROM Games 
+                                         JOIN Library ON Games.game_id = Library.game_id 
+                                         WHERE Library.user_id = ?`,
+                                        [user_id],
+                                        (err, rows) => {
+                                            if (err) {
+                                                console.error("Error fetching library:", err.message);
+                                                return res.status(500).json({ error: err.message });
+                                            }
+                                            res.status(200).json({
+                                                message: "Game added to library and balance updated",
+                                                library: rows,
+                                                new_balance: newBalance,
+                                            });
+                                        }
+                                    );
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+        }
+    );
+})
 
 app.get('/games', (req, res) => {
     db.all('SELECT * FROM Games', [], (err, rows) => {
@@ -90,21 +161,24 @@ app.get('/login', (req, res) => {
     });
   });
 
-app.get('/library/:userId', (req, res) => {
-    const userId = req.params.userId;
-    db.all(`
-        SELECT Games.* FROM Games
-        JOIN Library ON Games.game_id = Library.game_id
-        WHERE Library.user_id = ?
-    `, [userId], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(rows);
-        }
-    });
-});
+  app.get('/library/:user_id', (req, res) => {
+    const user_id = req.params.user_id;
 
+    db.all(
+        `SELECT Library.library_id, Games.title, Games.genre, Games.price, Games.release_date 
+         FROM Games 
+         JOIN Library ON Games.game_id = Library.game_id 
+         WHERE Library.user_id = ?`,
+        [user_id],
+        (err, rows) => {
+            if (err) {
+                console.error("Error fetching library:", err.message);
+                return res.status(500).json({ error: err.message });
+            }
+            res.status(200).json(rows);
+        }
+    );
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
