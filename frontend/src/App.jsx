@@ -20,8 +20,8 @@ function App() {
       <NavigationBar />
       <div className="main">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/store" element={<Store />} />
+          <Route path="/" element={<Home user={user} />} />
+          <Route path="/store" element={<Store user={user} />} />
           <Route path="/library" element={<Library user={user} />} />
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
         </Routes>

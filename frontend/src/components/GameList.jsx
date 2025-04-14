@@ -19,9 +19,33 @@ function GameList(){
     //     ];
     //     setGames(fetchedGames);
     // }, []);
+    const handleAddToLibrary = (gameId) => {
+        if (!user) {
+            alert("You need to log in to add games to your library.");
+            return;
+        }
+
+        fetch('http://localhost:3001/library', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user_id: user.user_id, game_id: gameId })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Failed to add game");
+            return res.json();
+        })
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(err => {
+            console.error("Error:", err.message);
+        });
+    };
     return (
         <div>
-            <h2>Games List</h2> 
+            <h2>Games List</h2>
             <ul>
                 {games.length === 0 ? (
                     <li>No games available</li>
@@ -33,6 +57,10 @@ function GameList(){
                             Price: ${game.price}  
                             <br />
                             Released: {game.release_date}
+                            <br />
+                            <button onClick={() => handleAddToLibrary(game.game_id)}>
+                                Add to Library
+                            </button>
                             <hr />
                         </li>
                     ))

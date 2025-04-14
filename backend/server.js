@@ -15,6 +15,54 @@ const db = new sqlite3.Database("C:/Users/Cole/Documents/College/CS/CS665/Projec
     }
 });
 
+app.post('/update-balance', (req, res) => {
+    
+    const { userId, amount } = req.body;
+
+    if (!userId || !amount) {
+        return res.status(400).json({ error: 'Missing userId or amount' });
+    }
+
+    
+    db.run(
+        `UPDATE Users SET balance = balance + ? WHERE user_id = ?`,
+        [amount, userId],
+        function(err) {
+            if (err) {
+                console.error('Error updating balance:', err.message);
+                return res.status(500).json({ error: err.message });
+            }
+
+            
+            db.get(`SELECT balance FROM Users WHERE user_id = ?`, [userId], (err, row) => {
+                if (err) {
+                    console.error('Error fetching updated balance:', err.message);
+                    return res.status(500).json({ error: err.message });
+                }
+
+                if (!row) {
+                    
+                    return res.status(404).json({ error: 'User not found' });
+                }
+                res.json({ newBalance: row.balance });
+            });
+        }
+    );
+});
+
+app.post('/library', (req, res) => {
+    const { user_id, game_id } = req.body;
+
+    db.run(`INSERT INTO Library (user_id, game_id) VALUES (?, ?)`, [user_id, game_id], function(err) {
+        if (err) {
+            console.error("Error adding game to library:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({ message: "Game added to library" });
+    });
+});
+
+
 app.get('/games', (req, res) => {
     db.all('SELECT * FROM Games', [], (err, rows) => {
         if (err) {
@@ -41,7 +89,7 @@ app.get('/login', (req, res) => {
       }
     });
   });
-  
+
 app.get('/library/:userId', (req, res) => {
     const userId = req.params.userId;
     db.all(`
